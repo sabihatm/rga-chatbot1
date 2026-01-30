@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SONA PULSE</title>
+
+<style>
+:root {
+    --burgundy-rgb: 121, 29, 21; /* lighter burgundy */
+    --gold-rgb: 212, 175, 55;
+}
+
+/* =========================
+   MAIN BODY
+   ========================= */
+#main-body {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: url('titan1.jpg') center / contain no-repeat;
+    background-color: #5a8fa0;
+}
+
+/* =========================
+   BACKGROUND LAYERS
+   ========================= */
+.bg-layer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 85vh;
+    background-position: contain;
+    background-repeat: no-repeat;
+    background-size: cover;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+    z-index: 1;
+}
+
+#rga-bg { background-image: url('RGA1.jpg'); }
+#ecom-bg { background-image: url('ecom2.png'); }
+
+/* =========================
+   HELLO BOX
+   ========================= */
+#hello-box {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    width: 260px;
+    background: rgba(255,255,255,0.96);
+    border-radius: 14px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 5;
+}
+
+#hello-box select {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+}
+
+/* =========================
+   CHAT CONTAINER
+   ========================= */
+.chat-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+    width: 360px;
+    height: 85vh;
+    background: rgba(255,255,255,0.95);
+    border-radius: 18px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+.header {
+    background: rgb(var(--burgundy-rgb));
+    color: rgb(var(--gold-rgb));
+    padding: 15px;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* =========================
+   CHAT AREA
+   ========================= */
+.chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.bot {
+    background: #cbe8ff;
+    padding: 12px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    max-width: 85%;
+}
+
+.user {
+    background: #ffca99;
+    padding: 12px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    max-width: 85%;
+    margin-left: auto;
+    text-align: right;
+}
+
+/* =========================
+   INPUT AREA
+   ========================= */
+.input-area {
+    display: flex;
+    padding: 12px;
+    background: #f5f5f5;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+button {
+    margin-left: 10px;
+    padding: 10px 18px;
+    background: rgb(var(--burgundy-rgb));
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* =========================
+   YES / NO
+   ========================= */
+        .button-yes {
+            background: green;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-right: 10px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .button-no {
+            background: red;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+/* =========================
+   RGA / ECOM CHAT COLORS
+   ========================= */
+.rga-bot { background-color: #F6EDE3 !important; }
+.rga-user { background-color: #E6C9A8 !important; }
+
+.ecom-bot { background-color: #EFE1CF !important; }
+.ecom-user { background-color: #D6B58A !important; }
+</style>
+</head>
+
+<body>
+
+<div id="main-body">
+
+    <div id="rga-bg" class="bg-layer"></div>
+    <div id="ecom-bg" class="bg-layer"></div>
+
+    <div id="hello-box">
+        <b>🤖 Hello! How can I help you?</b><br><br>
+        <select id="selectMode">
+            <option value="">Select Channel</option>
+            <option value="RGA">RGA</option>
+            <option value="ECOM">ECOM</option>
+        </select>
+    </div>
+
+    <div class="chat-container hidden" id="chatContainer">
+        <div class="header">SONA PULSE</div>
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-area">
+            <input id="userInput" placeholder="Enter message...">
+            <button onclick="sendMsg()">Send</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let typingBubble = null;
+let currentMode = "";
+
+function setBackground(mode) {
+    document.getElementById("rga-bg").style.opacity = mode === "RGA" ? "1" : "0";
+    document.getElementById("ecom-bg").style.opacity = mode === "ECOM" ? "1" : "0";
+    document.getElementById("main-body").style.background = "#0b3c4a";
+    currentMode = mode;
+}
+
+document.getElementById("selectMode").addEventListener("change", function () {
+    const mode = this.value;
+    if (!mode) return;
+
+    document.getElementById("hello-box").style.display = "none";
+    document.getElementById("chatContainer").classList.remove("hidden");
+
+    setBackground(mode);
+    addBot("Mode selected: " + mode);
+    sendMessage(mode);
+});
+
+function showTyping() {
+    typingBubble = document.createElement("div");
+    typingBubble.className = "bot";
+    typingBubble.textContent = "...";
+    chatBox.appendChild(typingBubble);
+}
+
+function removeTyping() {
+    if (typingBubble) typingBubble.remove();
+}
+
+function addBot(msg) {
+    const div = document.createElement("div");
+    div.innerHTML = `🤖 ${msg.replace(/\n/g, "<br>")}`;
+    div.className = "bot";
+    if (currentMode === "RGA") div.classList.add("rga-bot");
+    if (currentMode === "ECOM") div.classList.add("ecom-bot");
+    chatBox.appendChild(div);
+}
+
+function addUser(msg) {
+    const div = document.createElement("div");
+    div.innerHTML = `👤 ${msg}`;
+    div.className = "user";
+    if (currentMode === "RGA") div.classList.add("rga-user");
+    if (currentMode === "ECOM") div.classList.add("ecom-user");
+    chatBox.appendChild(div);
+}
+
+function sendMsg() {
+    const input = document.getElementById("userInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+    addUser(msg);
+    input.value = "";
+    sendMessage(msg);
+}
+
+function sendButton(ans) {
+    addUser(ans);
+    sendMessage(ans);
+}
+
+async function sendMessage(msg) {
+    showTyping();
+    const res = await fetch("http://127.0.0.1:5050/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+    });
+
+    removeTyping();
+    const data = await res.json();
+
+    if (data.ask_update) {
+        addBot(
+            data.reply +
+            "<br><br>" +
+            `<span class="button-yes" onclick="sendButton('yes')">Yes</span>` +
+            `<span class="button-no" onclick="sendButton('no')">No</span>`
+        );
+    } else {
+        addBot(data.reply);
+    }
+}
+</script>
+
+</body>
+</html>
