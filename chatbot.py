@@ -18,7 +18,7 @@ CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-EXCEL_PATH = os.path.join(BASE_DIR, "rga.xlsx")
+EXCEL_PATH = os.path.join(BASE_DIR, "rga.xlsx.xlsx")
 PINCODE_CSV = os.path.join(BASE_DIR, "pincode.csv")
 SHEET_NAME = "RGA status"
 LOG_FILE = os.path.join(BASE_DIR, "chatbot.log")
@@ -380,3 +380,4 @@ def initialize_app():
         except Exception as e:
             write_log(f"Initialization failed: {e}", error=True)
         initialized = True
+
