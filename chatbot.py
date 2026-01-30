@@ -359,25 +359,22 @@ def open_frontend():
         webbrowser.open(f"file:///{path}")
 
 # =============================================================
-# SAFE INITIALIZATION FOR RENDER
+# browser
 # =============================================================
-
+@app.route("/", methods=["GET"])
+def home():
+    # Serve frontend if it exists, else show a message
+    frontend_path = os.path.join(BASE_DIR, "web1.html")
+    if os.path.exists(frontend_path):
+        return send_from_directory(BASE_DIR, "web1.html")
+    return "RGA Chatbot API is running. Use POST /chatbot to interact."
 # =============================================================
 # SAFE INITIALIZATION FOR RENDER (FLASK 3.x)
 # =============================================================
 
 initialized = False
 
-@app.before_request
-def initialize_app():
-    global initialized
-    if not initialized:
-        try:
-            load_excel()
-            load_pincode_csv()
-            reset_chat_state()
-            write_log("Chatbot initialized (Render mode).")
-        except Exception as e:
-            write_log(f"Initialization failed: {e}", error=True)
-        initialized = True
-
+load_excel()
+load_pincode_csv()
+reset_chat_state()
+write_log("Chatbot initialized (Render mode).")
