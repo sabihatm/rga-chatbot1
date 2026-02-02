@@ -348,28 +348,17 @@ def chatbot():
         write_log(traceback.format_exc(), True)
         return jsonify({"reply": "Internal error occurred."})
 
-@app.route("/", methods=["GET"])
-def home():
-    return send_from_directory(BASE_DIR, "web1.html")
-
-# ----------------------------
-# Serve HTML file
-# ----------------------------
+# Serve the main HTML page
 @app.route("/")
 def home():
     return send_from_directory(os.getcwd(), "web1.html")
 
-# ----------------------------
-# Serve images from root
-# ----------------------------
+# Serve any file from root (images, favicon, etc.)
 @app.route("/<filename>")
 def root_files(filename):
-    # Serve images or any other file from root
     return send_from_directory(os.getcwd(), filename)
 
-# ----------------------------
 # Chatbot endpoint
-# ----------------------------
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
     data = request.get_json()
@@ -378,13 +367,12 @@ def chatbot():
     # Example bot logic
     response = {"reply": f"You said: {message}", "ask_update": False}
 
-    # Example conditional for yes/no
+    # Conditional yes/no buttons for channels
     if message.lower() in ["rga", "ecom"]:
         response["reply"] = f"Channel selected: {message}"
         response["ask_update"] = True
 
     return jsonify(response)
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
