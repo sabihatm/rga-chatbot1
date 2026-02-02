@@ -9,7 +9,8 @@ import threading
 import time
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
+
 CORS(app)
 
 # =============================================================
@@ -351,7 +352,7 @@ def chatbot():
 # ================= SERVE HTML & FILES =================
 @app.route("/")
 def index():
-    return send_from_directory(os.getcwd(), "web1.html")
+    return send_from_directory(BASE_DIR, "web1.html")
 
 @app.route("/<path:filename>")
 def serve_file(filename):
@@ -368,3 +369,4 @@ def serve_file(filename):
 if __name__=="__main__":
     port=int(os.environ.get("PORT",5000))
     app.run(host="0.0.0.0", port=port)
+
