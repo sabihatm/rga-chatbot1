@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, Response
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import traceback
@@ -9,15 +9,14 @@ import threading
 import time
 import os
 
-app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(__name__)
 
 CORS(app)
 
 # =============================================================
 # CONFIG (UPDATED FOR RENDER)
 # =============================================================
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 EXCEL_PATH = os.path.join(BASE_DIR, "rga.xlsx.xlsx")
 PINCODE_CSV = os.path.join(BASE_DIR, "pincode.csv")
@@ -354,10 +353,39 @@ def chatbot():
 def index():
     return send_from_directory(BASE_DIR, "web1.html")
 
+# -------------------------------
+# Serve ALL root static files
+# (THIS IS THE CRITICAL FIX)
+# -------------------------------
+@app.route("/<path:filename>")
+def root_static(filename):
+    file_path = os.path.join(BASE_DIR, filename)
+    if os.path.exists(file_path):
+        return send_from_directory(BASE_DIR, filename)
+    return ("Not Found", 404)
 
+# -------------------------------
+# Chatbot API
+# -------------------------------
+@app.route("/chatbot", methods=["POST"])
+def chatbot():
+    data = request.get_json()
+    msg = data.get("message", "").lower()
 
-if __name__=="__main__":
-    port=int(os.environ.get("PORT",5000))
+    if msg in ["rga", "ecom"]:
+        return jsonify({
+            "reply": f"{msg.upper()} mode activated. How can I help you?",
+            "ask_update": False
+        })
+
+    return jsonify({
+        "reply": "This is a sample response from the chatbot.",
+        "ask_update": False
+    })
+
+# -------------------------------
+# Render-compatible run
+# -------------------------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-
