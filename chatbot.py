@@ -23,7 +23,7 @@ PINCODE_CSV = os.path.join(BASE_DIR, "pincode.csv")
 SHEET_NAME = "RGA status"
 LOG_FILE = os.path.join(BASE_DIR, "chatbot.log")
 
-os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+# os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 COL_ADDRESS_1 = "Address 1"
 COL_ADDRESS_2 = "Address 2"
@@ -348,35 +348,26 @@ def chatbot():
         write_log(traceback.format_exc(), True)
         return jsonify({"reply": "Internal error occurred."})
 
-# =============================================================
-# OPEN FRONTEND
-# =============================================================
-# -------------------------------------------------
 @app.route("/", methods=["GET"])
 def home():
-    # Serve frontend if it exists, else show a message
-    frontend_path = os.path.join(BASE_DIR, "web1.html")
-    if os.path.exists(frontend_path):
-        return send_from_directory(BASE_DIR, "web1.html")
-    return "RGA Chatbot API is running. Use POST /chatbot to interact."
-# -------------------------------------------------
-# STATIC FILES (IMAGES, CSS IF ANY)
-# -------------------------------------------------
+    return send_from_directory(BASE_DIR, "web1.html")
 
+# =============================================================
+# SERVE STATIC FILES FROM ROOT
+# =============================================================
 @app.route("/<path:filename>")
 def serve_file(filename):
-    # Only allow certain file types for safety
     if filename.lower().endswith((".jpg", ".png", ".ico")):
         return send_from_directory(BASE_DIR, filename)
     return "File not found", 404
 
 # =============================================================
-# INIT
+# INITIALIZATION
 # =============================================================
+load_excel()
+load_pincode_csv()
+reset_chat_state()
+write_log("Chatbot initialized (Render mode).")
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
-
-
-
+    app.run(host="0.0.0.0", port=5050, debug=True)
