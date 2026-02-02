@@ -184,6 +184,7 @@ button {
 
 .ecom-bot { background-color: #EFE1CF !important; }
 .ecom-user { background-color: #D6B58A !important; }
+    
 </style>
 </head>
 
@@ -283,13 +284,15 @@ function sendButton(ans) {
 async function sendMessage(msg) {
     showTyping();
     try {
-        const res = await fetch("/chatbot", {  // ✅ relative URL
+        const res = await fetch("/chatbot", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ message: msg })
         });
+
         removeTyping();
         const data = await res.json();
+
         if (data.ask_update) {
             addBot(
                 data.reply +
@@ -302,13 +305,15 @@ async function sendMessage(msg) {
         }
     } catch (err) {
         removeTyping();
-        addBot("⚠️ Chatbot is currently unreachable.");
+        addBot("Error connecting to server.");
+        console.error(err);
     }
 }
 </script>
 
 </body>
 </html>
+
 
 
 
