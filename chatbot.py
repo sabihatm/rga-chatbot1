@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import traceback
@@ -351,19 +351,23 @@ def chatbot():
 # =============================================================
 # OPEN FRONTEND
 # =============================================================
+# -------------------------------------------------
 @app.route("/")
 def home():
-    return render_template("web1.html")
+    return send_from_directory(BASE_DIR, "web1.html")
 
-@app.route("/static/<path:filename>")
+# -------------------------------------------------
+# STATIC FILES (IMAGES, CSS IF ANY)
+# -------------------------------------------------
+@app.route("/<path:filename>")
 def static_files(filename):
-    return send_from_directory(app.static_folder, filename)
+    return send_from_directory(BASE_DIR, filename)
 
 # =============================================================
 # INIT
 # =============================================================
 
-load_excel()
-load_pincode_csv()
-reset_chat_state()
-write_log("Chatbot initialized (Render)")
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
+
