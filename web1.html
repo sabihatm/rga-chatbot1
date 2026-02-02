@@ -282,30 +282,33 @@ function sendButton(ans) {
 
 async function sendMessage(msg) {
     showTyping();
-
-    const res = await fetch("/chatbot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
-    });
-
-    removeTyping();
-    const data = await res.json();
-
-    if (data.ask_update) {
-        addBot(
-            data.reply +
-            "<br><br>" +
-            `<span class="button-yes" onclick="sendButton('yes')">Yes</span>` +
-            `<span class="button-no" onclick="sendButton('no')">No</span>`
-        );
-    } else {
-        addBot(data.reply);
+    try {
+        const res = await fetch("/chatbot", {  // ✅ relative URL
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: msg })
+        });
+        removeTyping();
+        const data = await res.json();
+        if (data.ask_update) {
+            addBot(
+                data.reply +
+                "<br><br>" +
+                `<span class="button-yes" onclick="sendButton('yes')">Yes</span>` +
+                `<span class="button-no" onclick="sendButton('no')">No</span>`
+            );
+        } else {
+            addBot(data.reply);
+        }
+    } catch (err) {
+        removeTyping();
+        addBot("⚠️ Chatbot is currently unreachable.");
     }
 }
 </script>
 
 </body>
 </html>
+
 
 
