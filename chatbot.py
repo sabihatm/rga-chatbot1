@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 import pandas as pd
 import traceback
@@ -351,31 +351,19 @@ def chatbot():
 # =============================================================
 # OPEN FRONTEND
 # =============================================================
-
-def open_frontend():
-    time.sleep(1.5)
-    path = os.path.abspath("web1.html")
-    if os.path.exists(path):
-        webbrowser.open(f"file:///{path}")
-
-# =============================================================
-# browser
-# =============================================================
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
-    # Serve frontend if it exists, else show a message
-    frontend_path = os.path.join(BASE_DIR, "web1.html")
-    if os.path.exists(frontend_path):
-        return send_from_directory(BASE_DIR, "web1.html")
-    return "RGA Chatbot API is running. Use POST /chatbot to interact."
-# =============================================================
-# SAFE INITIALIZATION FOR RENDER (FLASK 3.x)
-# =============================================================
+    return render_template("web1.html")
 
-initialized = False
+@app.route("/static/<path:filename>")
+def static_files(filename):
+    return send_from_directory(app.static_folder, filename)
+
+# =============================================================
+# INIT
+# =============================================================
 
 load_excel()
 load_pincode_csv()
 reset_chat_state()
-write_log("Chatbot initialized (Render mode).")
-
+write_log("Chatbot initialized (Render)")
