@@ -366,20 +366,7 @@ def serve_file(filename):
             mimetype='image/gif'
         )
 
-# Chatbot endpoint
-@app.route("/chatbot", methods=["POST"])
-def chatbot():
-    data = request.get_json()
-    message = data.get("message", "")
-
-    response = {"reply": f"You said: {message}", "ask_update": False}
-
-    if message.lower() in ["rga", "ecom"]:
-        response["reply"] = f"Channel selected: {message}"
-        response["ask_update"] = True
-
-    return jsonify(response)
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
