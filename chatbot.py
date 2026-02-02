@@ -357,12 +357,12 @@ def serve_file(filename):
     if os.path.exists(os.path.join(os.getcwd(), filename)):
         return send_from_directory(os.getcwd(), filename)
     else:
-        # fallback transparent pixel to avoid 404 log spam
+        from flask import Response
+        # Return 1x1 transparent pixel to avoid 404 spam
         return Response(
             b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b',
             mimetype='image/gif'
         )
-
 # =============================================================
 # MAIN
 # =============================================================
@@ -371,3 +371,4 @@ if __name__ == "__main__":
     load_pincode_csv()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
