@@ -348,15 +348,23 @@ def chatbot():
         write_log(traceback.format_exc(), True)
         return jsonify({"reply": "Internal error occurred."})
 
-# Serve the main HTML page
+# Serve main HTML
 @app.route("/")
-def home():
+def index():
     return send_from_directory(os.getcwd(), "web1.html")
 
 # Serve any file from root (images, favicon, etc.)
-@app.route("/<filename>")
-def root_files(filename):
-    return send_from_directory(os.getcwd(), filename)
+@app.route("/<path:filename>")
+def serve_file(filename):
+    if os.path.exists(os.path.join(os.getcwd(), filename)):
+        return send_from_directory(os.getcwd(), filename)
+    else:
+        # Return a 1x1 transparent pixel if file not found to avoid 404 errors in logs
+        from flask import Response
+        return Response(
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b',
+            mimetype='image/gif'
+        )
 
 # Chatbot endpoint
 @app.route("/chatbot", methods=["POST"])
@@ -364,10 +372,8 @@ def chatbot():
     data = request.get_json()
     message = data.get("message", "")
 
-    # Example bot logic
     response = {"reply": f"You said: {message}", "ask_update": False}
 
-    # Conditional yes/no buttons for channels
     if message.lower() in ["rga", "ecom"]:
         response["reply"] = f"Channel selected: {message}"
         response["ask_update"] = True
