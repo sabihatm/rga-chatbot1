@@ -352,10 +352,13 @@ def chatbot():
 # OPEN FRONTEND
 # =============================================================
 # -------------------------------------------------
-@app.route("/")
+@app.route("/", methods=["GET"])
 def home():
-    return send_from_directory(BASE_DIR, "web1.html")
-
+    # Serve frontend if it exists, else show a message
+    frontend_path = os.path.join(BASE_DIR, "web1.html")
+    if os.path.exists(frontend_path):
+        return send_from_directory(BASE_DIR, "web1.html")
+    return "RGA Chatbot API is running. Use POST /chatbot to interact."
 # -------------------------------------------------
 # STATIC FILES (IMAGES, CSS IF ANY)
 # -------------------------------------------------
@@ -370,4 +373,5 @@ def static_files(filename):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
