@@ -355,19 +355,24 @@ def home():
 # =============================================================
 # SERVE STATIC FILES FROM ROOT
 # =============================================================
+# Serve any file from root
 @app.route("/<path:filename>")
 def serve_file(filename):
-    if filename.lower().endswith((".jpg", ".png", ".ico")):
-        return send_from_directory(BASE_DIR, filename)
-    return "File not found", 404
+    return send_from_directory(BASE_DIR, filename)
 
-# =============================================================
-# INITIALIZATION
-# =============================================================
-load_excel()
-load_pincode_csv()
-reset_chat_state()
-write_log("Chatbot initialized (Render mode).")
+@app.route("/")
+def home():
+    return send_from_directory(BASE_DIR, "web1.html")
+
+@app.route("/chatbot", methods=["POST"])
+def chatbot():
+    try:
+        msg = request.json.get("message", "")
+        # Temporary demo response, replace with your actual chatbot logic
+        return jsonify({"reply": f"You said: {msg}"})
+    except Exception:
+        traceback.print_exc()
+        return jsonify({"reply": "Internal error occurred."})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050, debug=True)
+    app.run(host="0.0.0.0", port=5050)
