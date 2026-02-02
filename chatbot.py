@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 import pandas as pd
 import traceback
@@ -348,25 +348,26 @@ def chatbot():
         write_log(traceback.format_exc(), True)
         return jsonify({"reply": "Internal error occurred."})
 
-# Serve main HTML
 @app.route("/")
 def index():
     return send_from_directory(os.getcwd(), "web1.html")
 
-# Serve any file from root (images, favicon, etc.)
 @app.route("/<path:filename>")
 def serve_file(filename):
     if os.path.exists(os.path.join(os.getcwd(), filename)):
         return send_from_directory(os.getcwd(), filename)
     else:
-        # Return a 1x1 transparent pixel if file not found to avoid 404 errors in logs
-        from flask import Response
+        # fallback transparent pixel to avoid 404 log spam
         return Response(
             b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff\x21\xf9\x04\x01\x00\x00\x00\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x44\x01\x00\x3b',
             mimetype='image/gif'
         )
 
+# =============================================================
+# MAIN
+# =============================================================
 if __name__ == "__main__":
+    load_excel()
+    load_pincode_csv()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
