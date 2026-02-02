@@ -224,24 +224,24 @@ function sendMsg(){
 
 function sendButton(ans){ addUser(ans); sendMessage(ans); }
 
-async function sendMessage(msg){
-    showTyping();
-    const res=await fetch("/chatbot",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({message:msg})
+async function send() {
+    const input = document.getElementById("msg");
+    const chat = document.getElementById("chat");
+    const text = input.value;
+    input.value = "";
+
+    chat.innerHTML += "<p><b>You:</b> " + text + "</p>";
+
+    const res = await fetch("/chatbot", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({message: text})
     });
-    removeTyping();
-    const data=await res.json();
-    if(data.ask_update){
-        addBot(
-            data.reply+
-            "<br><br>"+
-            `<span class="button-yes" onclick="sendButton('yes')">Yes</span>`+
-            `<span class="button-no" onclick="sendButton('no')">No</span>`
-        );
-    } else { addBot(data.reply); }
+
+    const data = await res.json();
+    chat.innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
 }
 </script>
 </body>
 </html>
+
