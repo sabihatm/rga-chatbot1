@@ -352,27 +352,40 @@ def chatbot():
 def home():
     return send_from_directory(BASE_DIR, "web1.html")
 
-# =============================================================
-# SERVE STATIC FILES FROM ROOT
-# =============================================================
-# Serve any file from root
-@app.route("/<path:filename>")
-def serve_file(filename):
-    return send_from_directory(BASE_DIR, filename)
-
+# ----------------------------
+# Serve HTML file
+# ----------------------------
 @app.route("/")
 def home():
-    return send_from_directory(BASE_DIR, "web1.html")
+    return send_from_directory(os.getcwd(), "web1.html")
 
+# ----------------------------
+# Serve images from root
+# ----------------------------
+@app.route("/<filename>")
+def root_files(filename):
+    # Serve images or any other file from root
+    return send_from_directory(os.getcwd(), filename)
+
+# ----------------------------
+# Chatbot endpoint
+# ----------------------------
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
-    try:
-        msg = request.json.get("message", "")
-        # Temporary demo response, replace with your actual chatbot logic
-        return jsonify({"reply": f"You said: {msg}"})
-    except Exception:
-        traceback.print_exc()
-        return jsonify({"reply": "Internal error occurred."})
+    data = request.get_json()
+    message = data.get("message", "")
+
+    # Example bot logic
+    response = {"reply": f"You said: {message}", "ask_update": False}
+
+    # Example conditional for yes/no
+    if message.lower() in ["rga", "ecom"]:
+        response["reply"] = f"Channel selected: {message}"
+        response["ask_update"] = True
+
+    return jsonify(response)
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5050)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
