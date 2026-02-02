@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import traceback
@@ -9,10 +9,10 @@ import threading
 import time
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__)
-
 CORS(app)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # =============================================================
 # CONFIG (UPDATED FOR RENDER)
@@ -269,6 +269,17 @@ def update_address():
 
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
+    data = request.get_json(silent=True) or {}
+    msg = data.get("message", "").strip()
+
+    if not msg:
+        return jsonify({"reply": "Please enter a message."})
+
+    if msg.upper() in ["RGA", "ECOM"]:
+        return jsonify({"reply": f"{msg} selected. Enter Account Number."})
+
+    return jsonify({"reply": f"Echo: {msg}"})
+
     global MODE, WAIT_ACCOUNT, WAIT_UPDATE_CHOICE, WAIT_FIELD, LAST_ACC, TEMP_ADDR
 
     try:
@@ -350,38 +361,26 @@ def chatbot():
 
 # ================= SERVE HTML & FILES =================
 @app.route("/")
-def index():
-    return send_from_directory(BASE_DIR, "web1.html")
+def home():
+    html_path = os.path.join(BASE_DIR, "web1.html")
+
+    if not os.path.exists(html_path):
+        return Response(
+            "<h1>ERROR</h1><p>web1.html not found in root.</p>",
+            status=500,
+            mimetype="text/html"
+        )
+
+    with open(html_path, "r", encoding="utf-8") as f:
+        return Response(f.read(), mimetype="text/html")
 
 # -------------------------------
-# Serve ALL root static files
-# (THIS IS THE CRITICAL FIX)
-# -------------------------------
 @app.route("/<path:filename>")
-def root_static(filename):
+def serve_root_files(filename):
     file_path = os.path.join(BASE_DIR, filename)
     if os.path.exists(file_path):
         return send_from_directory(BASE_DIR, filename)
-    return ("Not Found", 404)
-
-# -------------------------------
-# Chatbot API
-# -------------------------------
-@app.route("/chatbot", methods=["POST"])
-def chatbot():
-    data = request.get_json()
-    msg = data.get("message", "").lower()
-
-    if msg in ["rga", "ecom"]:
-        return jsonify({
-            "reply": f"{msg.upper()} mode activated. How can I help you?",
-            "ask_update": False
-        })
-
-    return jsonify({
-        "reply": "This is a sample response from the chatbot.",
-        "ask_update": False
-    })
+    return Response("", status=404)
 
 # -------------------------------
 # Render-compatible run
@@ -389,3 +388,4 @@ def chatbot():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
