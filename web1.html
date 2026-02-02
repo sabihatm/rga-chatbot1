@@ -10,6 +10,8 @@
     --gold-rgb: 212, 175, 55;
 }
 
+body, html { margin:0; padding:0; height:100%; }
+
 #main-body {
     position: relative;
     width: 100%;
@@ -129,24 +131,8 @@ button {
     font-weight: bold;
 }
 
-.button-yes {
-    background: green;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-right: 10px;
-    cursor: pointer;
-    display: inline-block;
-}
-
-.button-no {
-    background: red;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: inline-block;
-}
+.button-yes { background: green; color: white; padding: 8px 12px; border-radius: 8px; margin-right: 10px; cursor: pointer; display: inline-block; }
+.button-no { background: red; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; display: inline-block; }
 
 .rga-bot { background-color: #F6EDE3 !important; }
 .rga-user { background-color: #E6C9A8 !important; }
@@ -155,7 +141,6 @@ button {
 .ecom-user { background-color: #D6B58A !important; }
 </style>
 </head>
-
 <body>
 <div id="main-body">
     <div id="rga-bg" class="bg-layer"></div>
@@ -184,85 +169,78 @@ button {
 let typingBubble = null;
 let currentMode = "";
 
-function setBackground(mode) {
-    document.getElementById("rga-bg").style.opacity = mode === "RGA" ? "1" : "0";
-    document.getElementById("ecom-bg").style.opacity = mode === "ECOM" ? "1" : "0";
-    document.getElementById("main-body").style.background = "#0b3c4a";
-    currentMode = mode;
+function setBackground(mode){
+    document.getElementById("rga-bg").style.opacity = mode==="RGA"?"1":"0";
+    document.getElementById("ecom-bg").style.opacity = mode==="ECOM"?"1":"0";
+    document.getElementById("main-body").style.background="#0b3c4a";
+    currentMode=mode;
 }
 
-document.getElementById("selectMode").addEventListener("change", function () {
-    const mode = this.value;
-    if (!mode) return;
-    document.getElementById("hello-box").style.display = "none";
+document.getElementById("selectMode").addEventListener("change",function(){
+    const mode=this.value;
+    if(!mode) return;
+    document.getElementById("hello-box").style.display="none";
     document.getElementById("chatContainer").classList.remove("hidden");
     setBackground(mode);
-    addBot("Mode selected: " + mode);
+    addBot("Mode selected: "+mode);
     sendMessage(mode);
 });
 
-function showTyping() {
-    typingBubble = document.createElement("div");
-    typingBubble.className = "bot";
-    typingBubble.textContent = "...";
+function showTyping(){
+    typingBubble=document.createElement("div");
+    typingBubble.className="bot";
+    typingBubble.textContent="...";
     chatBox.appendChild(typingBubble);
 }
 
-function removeTyping() {
-    if (typingBubble) typingBubble.remove();
-}
+function removeTyping(){ if(typingBubble) typingBubble.remove(); }
 
-function addBot(msg) {
-    const div = document.createElement("div");
-    div.innerHTML = `🤖 ${msg.replace(/\n/g, "<br>")}`;
-    div.className = "bot";
-    if (currentMode === "RGA") div.classList.add("rga-bot");
-    if (currentMode === "ECOM") div.classList.add("ecom-bot");
+function addBot(msg){
+    const div=document.createElement("div");
+    div.innerHTML=`🤖 ${msg.replace(/\n/g,"<br>")}`;
+    div.className="bot";
+    if(currentMode==="RGA") div.classList.add("rga-bot");
+    if(currentMode==="ECOM") div.classList.add("ecom-bot");
     chatBox.appendChild(div);
 }
 
-function addUser(msg) {
-    const div = document.createElement("div");
-    div.innerHTML = `👤 ${msg}`;
-    div.className = "user";
-    if (currentMode === "RGA") div.classList.add("rga-user");
-    if (currentMode === "ECOM") div.classList.add("ecom-user");
+function addUser(msg){
+    const div=document.createElement("div");
+    div.innerHTML=`👤 ${msg}`;
+    div.className="user";
+    if(currentMode==="RGA") div.classList.add("rga-user");
+    if(currentMode==="ECOM") div.classList.add("ecom-user");
     chatBox.appendChild(div);
 }
 
-function sendMsg() {
-    const input = document.getElementById("userInput");
-    const msg = input.value.trim();
-    if (!msg) return;
+function sendMsg(){
+    const input=document.getElementById("userInput");
+    const msg=input.value.trim();
+    if(!msg) return;
     addUser(msg);
-    input.value = "";
+    input.value="";
     sendMessage(msg);
 }
 
-function sendButton(ans) {
-    addUser(ans);
-    sendMessage(ans);
-}
+function sendButton(ans){ addUser(ans); sendMessage(ans); }
 
-async function sendMessage(msg) {
+async function sendMessage(msg){
     showTyping();
-    const res = await fetch("/chatbot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
+    const res=await fetch("/chatbot",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message:msg})
     });
     removeTyping();
-    const data = await res.json();
-    if (data.ask_update) {
+    const data=await res.json();
+    if(data.ask_update){
         addBot(
-            data.reply +
-            "<br><br>" +
-            `<span class="button-yes" onclick="sendButton('yes')">Yes</span>` +
+            data.reply+
+            "<br><br>"+
+            `<span class="button-yes" onclick="sendButton('yes')">Yes</span>`+
             `<span class="button-no" onclick="sendButton('no')">No</span>`
         );
-    } else {
-        addBot(data.reply);
-    }
+    } else { addBot(data.reply); }
 }
 </script>
 </body>
