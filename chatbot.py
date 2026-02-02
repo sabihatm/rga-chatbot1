@@ -362,9 +362,13 @@ def home():
 # -------------------------------------------------
 # STATIC FILES (IMAGES, CSS IF ANY)
 # -------------------------------------------------
+
 @app.route("/<path:filename>")
-def static_files(filename):
-    return send_from_directory(BASE_DIR, filename)
+def serve_file(filename):
+    # Only allow certain file types for safety
+    if filename.lower().endswith((".jpg", ".png", ".ico")):
+        return send_from_directory(BASE_DIR, filename)
+    return "File not found", 404
 
 # =============================================================
 # INIT
@@ -373,5 +377,6 @@ def static_files(filename):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
 
 
