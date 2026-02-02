@@ -282,7 +282,8 @@ function sendButton(ans) {
 
 async function sendMessage(msg) {
     showTyping();
-    const res = await fetch("http://127.0.0.1:5050/chatbot", {
+
+    const res = await fetch("/chatbot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: msg })
@@ -306,4 +307,5 @@ async function sendMessage(msg) {
 
 </body>
 </html>
+
 
