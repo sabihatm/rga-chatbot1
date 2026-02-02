@@ -4,33 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SONA PULSE</title>
-
 <style>
 :root {
-    --burgundy-rgb: 121, 29, 21; /* lighter burgundy */
+    --burgundy-rgb: 121, 29, 21;
     --gold-rgb: 212, 175, 55;
 }
 
-/* =========================
-   MAIN BODY
-   ========================= */
 #main-body {
     position: relative;
     width: 100%;
     height: 100vh;
     overflow: hidden;
     font-family: Arial, sans-serif;
-    background: url('Titan1.jpg') center / contain no-repeat;
+    background: url('titan1.jpg') center / contain no-repeat;
     background-color: #5a8fa0;
 }
 
-/* =========================
-   BACKGROUND LAYERS
-   ========================= */
 .bg-layer {
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 0; right: 0;
     top: 50%;
     transform: translateY(-50%);
     height: 85vh;
@@ -45,9 +37,6 @@
 #rga-bg { background-image: url('RGA1.jpg'); }
 #ecom-bg { background-image: url('ecom2.png'); }
 
-/* =========================
-   HELLO BOX
-   ========================= */
 #hello-box {
     position: absolute;
     bottom: 25px;
@@ -66,9 +55,6 @@
     padding: 8px;
 }
 
-/* =========================
-   CHAT CONTAINER
-   ========================= */
 .chat-container {
     position: absolute;
     top: 50%;
@@ -84,13 +70,8 @@
     flex-direction: column;
 }
 
-.hidden {
-    display: none !important;
-}
+.hidden { display: none !important; }
 
-/* =========================
-   HEADER
-   ========================= */
 .header {
     background: rgb(var(--burgundy-rgb));
     color: rgb(var(--gold-rgb));
@@ -100,9 +81,6 @@
     text-align: center;
 }
 
-/* =========================
-   CHAT AREA
-   ========================= */
 .chat-box {
     flex: 1;
     overflow-y: auto;
@@ -127,9 +105,6 @@
     text-align: right;
 }
 
-/* =========================
-   INPUT AREA
-   ========================= */
 .input-area {
     display: flex;
     padding: 12px;
@@ -154,44 +129,35 @@ button {
     font-weight: bold;
 }
 
-/* =========================
-   YES / NO
-   ========================= */
-        .button-yes {
-            background: green;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            margin-right: 10px;
-            cursor: pointer;
-            display: inline-block;
-        }
+.button-yes {
+    background: green;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-right: 10px;
+    cursor: pointer;
+    display: inline-block;
+}
 
-        .button-no {
-            background: red;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-block;
-        }
+.button-no {
+    background: red;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-block;
+}
 
-/* =========================
-   RGA / ECOM CHAT COLORS
-   ========================= */
 .rga-bot { background-color: #F6EDE3 !important; }
 .rga-user { background-color: #E6C9A8 !important; }
 
 .ecom-bot { background-color: #EFE1CF !important; }
 .ecom-user { background-color: #D6B58A !important; }
-    
 </style>
 </head>
 
 <body>
-
 <div id="main-body">
-
     <div id="rga-bg" class="bg-layer"></div>
     <div id="ecom-bg" class="bg-layer"></div>
 
@@ -212,7 +178,6 @@ button {
             <button onclick="sendMsg()">Send</button>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -229,10 +194,8 @@ function setBackground(mode) {
 document.getElementById("selectMode").addEventListener("change", function () {
     const mode = this.value;
     if (!mode) return;
-
     document.getElementById("hello-box").style.display = "none";
     document.getElementById("chatContainer").classList.remove("hidden");
-
     setBackground(mode);
     addBot("Mode selected: " + mode);
     sendMessage(mode);
@@ -283,37 +246,24 @@ function sendButton(ans) {
 
 async function sendMessage(msg) {
     showTyping();
-    try {
-        const res = await fetch("/chatbot", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: msg })
-        });
-
-        removeTyping();
-        const data = await res.json();
-
-        if (data.ask_update) {
-            addBot(
-                data.reply +
-                "<br><br>" +
-                `<span class="button-yes" onclick="sendButton('yes')">Yes</span>` +
-                `<span class="button-no" onclick="sendButton('no')">No</span>`
-            );
-        } else {
-            addBot(data.reply);
-        }
-    } catch (err) {
-        removeTyping();
-        addBot("Error connecting to server.");
-        console.error(err);
+    const res = await fetch("/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+    });
+    removeTyping();
+    const data = await res.json();
+    if (data.ask_update) {
+        addBot(
+            data.reply +
+            "<br><br>" +
+            `<span class="button-yes" onclick="sendButton('yes')">Yes</span>` +
+            `<span class="button-no" onclick="sendButton('no')">No</span>`
+        );
+    } else {
+        addBot(data.reply);
     }
 }
 </script>
-
 </body>
 </html>
-
-
-
-
