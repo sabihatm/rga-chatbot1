@@ -166,8 +166,11 @@ button {
 </div>
 
 <script>
+const chatBox = document.getElementById("chatBox");
+const userInput = document.getElementById("userInput");
+
 let typingBubble = null;
-let currentMode = "";
+let currentMode = "";    
 
 function setBackground(mode){
     document.getElementById("rga-bg").style.opacity = mode==="RGA"?"1":"0";
@@ -176,14 +179,16 @@ function setBackground(mode){
     currentMode=mode;
 }
 
-document.getElementById("selectMode").addEventListener("change",function(){
-    const mode=this.value;
+document.getElementById("selectMode").addEventListener("change", function(){
+    const mode = this.value;
     if(!mode) return;
-    document.getElementById("hello-box").style.display="none";
+
+    document.getElementById("hello-box").style.display = "none";
     document.getElementById("chatContainer").classList.remove("hidden");
+
     setBackground(mode);
-    addBot("Mode selected: "+mode);
-    sendMessage(mode);
+    addBot("Mode selected: " + mode);
+    sendToBot(mode);
 });
 
 function showTyping(){
@@ -196,65 +201,54 @@ function showTyping(){
 function removeTyping(){ if(typingBubble) typingBubble.remove(); }
 
 function addBot(msg){
-    const div=document.createElement("div");
-    div.innerHTML=`🤖 ${msg.replace(/\n/g,"<br>")}`;
-    div.className="bot";
+    const div = document.createElement("div");
+    div.className = "bot";
     if(currentMode==="RGA") div.classList.add("rga-bot");
     if(currentMode==="ECOM") div.classList.add("ecom-bot");
+    div.innerHTML = "🤖 " + msg;
     chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 function addUser(msg){
-    const div=document.createElement("div");
-    div.innerHTML=`👤 ${msg}`;
-    div.className="user";
+    const div = document.createElement("div");
+    div.className = "user";
     if(currentMode==="RGA") div.classList.add("rga-user");
     if(currentMode==="ECOM") div.classList.add("ecom-user");
+    div.innerHTML = "👤 " + msg;
     chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
-
 function sendMsg(){
-    const input=document.getElementById("userInput");
-    const msg=input.value.trim();
+    const msg = userInput.value.trim();
     if(!msg) return;
     addUser(msg);
-    input.value="";
-    sendMessage(msg);
+    userInput.value = "";
+    sendToBot(msg);
 }
 
-function appendBot(msg){
-    const div = document.createElement("div");
-    div.innerHTML = "<b>Bot:</b> " + msg;
-    document.getElementById("chatBox").appendChild(div);
+async function sendToBot(message){
+    try{
+        const res = await fetch("/chatbot", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+        addBot(data.reply);
+    } catch (e){
+        addBot("Server error. Please try again.");
+    }
 }
 
-function appendUser(msg){
-    const div = document.createElement("div");
-    div.innerHTML = "<b>You:</b> " + msg;
-    document.getElementById("chatBox").appendChild(div);
-}
- 
-function sendButton(ans){ addUser(ans); sendMessage(ans); }
+userInput.addEventListener("keypress", e => {
+    if(e.key === "Enter") sendMsg();
+});
 
-async function send() {
-    const input = document.getElementById("msg");
-    const chat = document.getElementById("chat");
-    const text = input.value;
-    input.value = "";
-
-    chat.innerHTML += "<p><b>You:</b> " + text + "</p>";
-
-    const res = await fetch("/chatbot", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({message: text})
-    });
-
-    const data = await res.json();
-    chat.innerHTML += "<p><b>Bot:</b> " + data.reply + "</p>";
-}
 </script>
 </body>
 </html>
+
 
 
