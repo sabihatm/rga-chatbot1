@@ -363,17 +363,10 @@ def chatbot():
 @app.route("/")
 def home():
     html_path = os.path.join(BASE_DIR, "web1.html")
-
     if not os.path.exists(html_path):
-        return Response(
-            "<h1>ERROR</h1><p>web1.html not found in root.</p>",
-            status=500,
-            mimetype="text/html"
-        )
-
+        return Response("<h1>web1.html missing</h1>", status=500, mimetype="text/html")
     with open(html_path, "r", encoding="utf-8") as f:
         return Response(f.read(), mimetype="text/html")
-
 # -------------------------------
 @app.route("/<path:filename>")
 def serve_root_files(filename):
@@ -386,6 +379,13 @@ def serve_root_files(filename):
 # Render-compatible run
 # -------------------------------
 if __name__ == "__main__":
+    try:
+        load_excel()
+        load_pincode_csv()
+    except Exception as e:
+        write_log(f"Startup error: {e}", True)
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
