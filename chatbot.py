@@ -10,7 +10,6 @@ import time
 import os
 
 app = Flask(__name__)
-
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -119,6 +118,16 @@ def load_pincode_csv():
     PIN_DF["pincode"] = PIN_DF["pincode"].astype(str).str.strip()
 
     write_log("Pincode CSV loaded successfully.")
+
+# =============================================================
+# INITIALIZE DATA (IMPORTANT FOR RENDER)
+# =============================================================
+
+try:
+    load_excel()
+    load_pincode_csv()
+except Exception as e:
+    print(f"[STARTUP ERROR] {e}")
 
 # =============================================================
 # HELPERS
@@ -268,18 +277,21 @@ def update_address():
 # =============================================================
 # CHATBOT API
 # =============================================================
-
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
     global MODE, WAIT_ACCOUNT, WAIT_UPDATE_CHOICE, WAIT_FIELD, LAST_ACC, TEMP_ADDR
 
+    if DF is None or PIN_DF is None:
+        return jsonify({"reply": "System initializing. Please try again."})
+
     try:
-        data = request.get_json(force=True)
+        data = request.get_json(silent=True) or {}
         msg = data.get("message", "").strip()
-        write_log(f"User: {msg}")
 
         if not msg:
             return jsonify({"reply": "Please enter a message."})
+
+        write_log(f"User: {msg}")
         
         if msg.upper() in ["RGA", "ECOM"]:
             reset_chat_state()
@@ -357,14 +369,27 @@ def chatbot():
 # ================= SERVE HTML & FILES =================
 @app.route("/")
 def home():
-    return send_from_directory(BASE_DIR, "web1.html")
+    html_path = os.path.join(BASE_DIR, "web1.html")
+    if not os.path.exists(html_path):
+        return Response("<h1>web1.html missing</h1>", status=500)
+    with open(html_path, "r", encoding="utf-8") as f:
+        return Response(f.read(), mimetype="text/html")
+
+# =============================================================
+# SERVE STATIC FILES FROM ROOT
+# =============================================================
 
 @app.route("/<path:filename>")
-def serve_files(filename):
-    return send_from_directory(BASE_DIR, filename)
+def serve_root_files(filename):
+    file_path = os.path.join(BASE_DIR, filename)
+    if os.path.exists(file_path):
+        return send_from_directory(BASE_DIR, filename)
+    return Response("", status=404)
 
-# ================= RUN =================
+# =============================================================
+# RUN (LOCAL ONLY)
+# =============================================================
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
