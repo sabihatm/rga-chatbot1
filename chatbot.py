@@ -10,6 +10,12 @@ import time
 import os
 
 app = Flask(__name__)
+try:
+    load_excel()
+    load_pincode_csv()
+except Exception as e:
+    write_log(f"Startup error: {e}", True)
+
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -122,8 +128,9 @@ def load_pincode_csv():
 # =============================================================
 # HELPERS
 # =============================================================
-
 def get_row(acc):
+    if DF is None:
+        raise Exception("Excel not loaded")
     r = DF[DF["Account No"] == int(acc)]
     return None if r.empty else r.iloc[0]
 
@@ -363,7 +370,5 @@ def serve_files(filename):
 
 # ================= RUN =================
 if __name__ == "__main__":
-    load_excel()
-    load_pincode_csv()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
