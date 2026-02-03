@@ -269,23 +269,16 @@ def update_address():
 
 @app.route("/chatbot", methods=["POST"])
 def chatbot():
-    data = request.get_json(silent=True) or {}
-    msg = data.get("message", "").strip()
-
-    if not msg:
-        return jsonify({"reply": "Please enter a message."})
-
-    if msg.upper() in ["RGA", "ECOM"]:
-        return jsonify({"reply": f"{msg} selected. Enter Account Number."})
-
-    return jsonify({"reply": f"Echo: {msg}"})
-
     global MODE, WAIT_ACCOUNT, WAIT_UPDATE_CHOICE, WAIT_FIELD, LAST_ACC, TEMP_ADDR
 
     try:
-        msg = request.json.get("message", "").strip()
-        write_log(f"User message: {msg}")
+        data = request.get_json(force=True)
+        msg = data.get("message", "").strip()
+        write_log(f"User: {msg}")
 
+        if not msg:
+            return jsonify({"reply": "Please enter a message."})
+        
         if msg.upper() in ["RGA", "ECOM"]:
             reset_chat_state()
             MODE = msg.upper()
@@ -362,30 +355,15 @@ def chatbot():
 # ================= SERVE HTML & FILES =================
 @app.route("/")
 def home():
-    html_path = os.path.join(BASE_DIR, "web1.html")
-    if not os.path.exists(html_path):
-        return Response("<h1>web1.html missing</h1>", status=500, mimetype="text/html")
-    with open(html_path, "r", encoding="utf-8") as f:
-        return Response(f.read(), mimetype="text/html")
-# -------------------------------
+    return send_from_directory(BASE_DIR, "web1.html")
+
 @app.route("/<path:filename>")
-def serve_root_files(filename):
-    file_path = os.path.join(BASE_DIR, filename)
-    if os.path.exists(file_path):
-        return send_from_directory(BASE_DIR, filename)
-    return Response("", status=404)
+def serve_files(filename):
+    return send_from_directory(BASE_DIR, filename)
 
-# -------------------------------
-# Render-compatible run
-# -------------------------------
+# ================= RUN =================
 if __name__ == "__main__":
-    try:
-        load_excel()
-        load_pincode_csv()
-    except Exception as e:
-        write_log(f"Startup error: {e}", True)
-
+    load_excel()
+    load_pincode_csv()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-
