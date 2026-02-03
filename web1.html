@@ -222,6 +222,18 @@ function sendMsg(){
     sendMessage(msg);
 }
 
+function appendBot(msg){
+    const div = document.createElement("div");
+    div.innerHTML = "<b>Bot:</b> " + msg;
+    document.getElementById("chatBox").appendChild(div);
+}
+
+function appendUser(msg){
+    const div = document.createElement("div");
+    div.innerHTML = "<b>You:</b> " + msg;
+    document.getElementById("chatBox").appendChild(div);
+}
+ 
 function sendButton(ans){ addUser(ans); sendMessage(ans); }
 
 async function send() {
@@ -244,4 +256,5 @@ async function send() {
 </script>
 </body>
 </html>
+
 
